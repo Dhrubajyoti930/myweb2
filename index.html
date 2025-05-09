@@ -1,7 +1,84 @@
 <!DOCTYPE html>
 <html>
-<body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
-</body>
+    <head>
+        <meta charset="utf-8">
+        <title>Spin-off of "Project: Blog"</title>
+    </head>
+    <style>
+        body {
+            background-color: rgb(97, 112, 9);
+            border: 5px solid ;
+            border-radius: 20px;
+        }
+        #blog-name {
+            font-size: 3em;
+            text-align: center;
+            font-family: monospace;
+            background-color: white;
+            text-shadow: 2px 2px rgb(100, 190, 60);
+            border: 10px solid #73AD21;
+        }
+        #content-head {
+            text-align: center;
+            
+        }
+        #content-content {
+            text-align: left;
+        }
+        #first-post {
+            content: "day1";
+        }
+
+        .post-head{
+            text-align: center;
+            background-color: white;
+            border: 5px solid rgb(196, 188, 43);
+        }
+        .date{
+            text-align: right;
+            font-style: italic;
+        }
+        .contents{
+            background-color: white;
+            border: 3px solid rgb(100, 190, 160);
+        }
+        .post-body{
+            color: white;
+            background-color: rgb(18, 18, 18);
+        }
+        
+    </style>
+    <body>
+        
+        <h1 id="blog-name">__DC's blog__</h1>
+
+        <h3 id="content-head" class="contents">Contents</h3>
+        <table class="contents">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><li><a href="#first-post">First post!</a></li></td>
+                    <td>9 May 2025</td>
+                </tr>
+                <tr>
+                    <td><li><a href="#second-post">Second post!</a></li></td>
+                    <td>9 May 2025</td>
+                </tr>
+            </tbody>
+        </table>
+
+        
+        <h2 class="post-head" id="first-post">First post</h2>
+        <h6 class="date">Posted on 9 May in 2025</h6>
+        <p class="post-body">I'm making my own blog.</p>
+        
+        <h2 class="post-head" id="second-post">Second post</h2>
+        <h6 class="date">Posted on 9 May in 2025</h6>
+        <p class="post-body">I did alot of progress today.</p>
+    </body>
 </html>
