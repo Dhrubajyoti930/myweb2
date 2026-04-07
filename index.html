@@ -1,13 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bouncing Ball and Rain</title>
+    <title>Animation Gallery</title>
     <style>
-        /* Ball animation container */
+        body {
+            font-family: Arial, sans-serif;
+            background: #222;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ---------------- Welcome Animation ---------------- */
+        #welcome {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeSlide 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(-20px); }
+            50% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+
+        /* ---------------- Ball animation container ---------------- */
         #ball-box {
             width: 300px;
             height: 300px;
-            border: 2px solid black;
+            border: 2px solid white;
             position: relative;
             overflow: hidden;
             margin-bottom: 50px;
@@ -21,17 +46,16 @@
             position: absolute;
         }
 
-        /* Rain animation container */
+        /* ---------------- Rain animation container ---------------- */
         #rain-box {
             width: 300px;
             height: 300px;
-            border: 2px solid black;
+            border: 2px solid white;
             position: relative;
             overflow: hidden;
-            background: #111; /* dark background for rain visibility */
+            background: #111;
         }
 
-        /* Raindrop style */
         .drop {
             position: absolute;
             width: 2px;
@@ -43,30 +67,31 @@
 </head>
 <body>
 
+    <!-- Welcome Animation -->
+    <div id="welcome">Welcome to the Animation Gallery!</div>
+
+    <!-- Bouncing Ball -->
     <div id="ball-box">
         <div id="ball"></div>
     </div>
 
+    <!-- Rain & Lightning -->
     <div id="rain-box"></div>
 
     <script>
         // ---------------- Ball Animation ----------------
         var ball = document.getElementById("ball");
         var ballBox = document.getElementById("ball-box");
-
         var x = 0, y = 0;
         var dx = 2, dy = 2;
         var boxSize = 300, ballSize = 30;
 
         function animateBall() {
             x += dx; y += dy;
-
             if (x + ballSize > boxSize || x < 0) dx = -dx;
             if (y + ballSize > boxSize || y < 0) dy = -dy;
-
             ball.style.left = x + "px";
             ball.style.top = y + "px";
-
             requestAnimationFrame(animateBall);
         }
         animateBall();
@@ -77,7 +102,6 @@
             var width = 300, height = 300;
             var drops = [], dropCount = 100;
 
-            // Create raindrops
             for (var i = 0; i < dropCount; i++) {
                 var drop = document.createElement("div");
                 drop.className = "drop";
@@ -103,7 +127,6 @@
                 requestAnimationFrame(animateRain);
             }
 
-            // Lightning flash
             function lightning() {
                 var flash = document.createElement("div");
                 flash.style.position = "absolute";
@@ -113,7 +136,6 @@
                 flash.style.height = "100%";
                 flash.style.background = "white";
                 flash.style.opacity = "0.8";
-
                 rainBox.appendChild(flash);
 
                 setTimeout(() => { flash.style.opacity = "0"; }, 50);
@@ -126,6 +148,5 @@
             lightning();
         })();
     </script>
-
 </body>
 </html>
