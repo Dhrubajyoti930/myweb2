@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bouncing Ball</title>
+    <title>Bouncing Ball and Rain</title>
     <style>
-        #box {
+        /* Ball animation container */
+        #ball-box {
             width: 300px;
             height: 300px;
             border: 2px solid black;
             position: relative;
             overflow: hidden;
+            margin-bottom: 50px;
         }
 
         #ball {
@@ -17,133 +19,113 @@
             background-color: red;
             border-radius: 50%;
             position: absolute;
-            left: 0;
-            top: 0;
+        }
+
+        /* Rain animation container */
+        #rain-box {
+            width: 300px;
+            height: 300px;
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+            background: #111; /* dark background for rain visibility */
+        }
+
+        /* Raindrop style */
+        .drop {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: blue;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
 
-<div id="box">
-    <div id="ball"></div>
-</div>
+    <div id="ball-box">
+        <div id="ball"></div>
+    </div>
 
-<script>
-    var ball = document.getElementById("ball");
-    var box = document.getElementById("box");
+    <div id="rain-box"></div>
 
-    var x = 0;
-    var y = 0;
+    <script>
+        // ---------------- Ball Animation ----------------
+        var ball = document.getElementById("ball");
+        var ballBox = document.getElementById("ball-box");
 
-    var dx = 2; // speed in x direction
-    var dy = 2; // speed in y direction
+        var x = 0, y = 0;
+        var dx = 2, dy = 2;
+        var boxSize = 300, ballSize = 30;
 
-    var boxSize = 300;
-    var ballSize = 30;
+        function animateBall() {
+            x += dx; y += dy;
 
-    function animate() {
-        x += dx;
-        y += dy;
+            if (x + ballSize > boxSize || x < 0) dx = -dx;
+            if (y + ballSize > boxSize || y < 0) dy = -dy;
 
-        // Bounce on walls
-        if (x + ballSize > boxSize || x < 0) {
-            dx = -dx;
+            ball.style.left = x + "px";
+            ball.style.top = y + "px";
+
+            requestAnimationFrame(animateBall);
         }
+        animateBall();
 
-        if (y + ballSize > boxSize || y < 0) {
-            dy = -dy;
-        }
+        // ---------------- Rain + Lightning Animation ----------------
+        (function () {
+            var rainBox = document.getElementById("rain-box");
+            var width = 300, height = 300;
+            var drops = [], dropCount = 100;
 
-        ball.style.left = x + "px";
-        ball.style.top = y + "px";
-
-        requestAnimationFrame(animate);
-    }
-
-    animate();
-</script>
-
-<script>
-(function () {
-    var box = document.getElementById("box");
-
-    // Move box 300em down
-    box.style.position = "relative";
-    box.style.top = "300em";
-
-    var width = 300;
-    var height = 300;
-
-    var drops = [];
-    var dropCount = 100;
-
-    // Create raindrops
-    for (var i = 0; i < dropCount; i++) {
-        var drop = document.createElement("div");
-        drop.style.position = "absolute";
-        drop.style.width = "2px";
-        drop.style.height = "10px";
-        drop.style.background = "blue";
-        drop.style.opacity = 0.6;
-
-        box.appendChild(drop);
-
-        drops.push({
-            el: drop,
-            x: Math.random() * width,
-            y: Math.random() * height,
-            speed: 2 + Math.random() * 3
-        });
-    }
-
-    function animateRain() {
-        for (var i = 0; i < drops.length; i++) {
-            var d = drops[i];
-
-            d.y += d.speed;
-
-            if (d.y > height) {
-                d.y = -10;
-                d.x = Math.random() * width;
+            // Create raindrops
+            for (var i = 0; i < dropCount; i++) {
+                var drop = document.createElement("div");
+                drop.className = "drop";
+                rainBox.appendChild(drop);
+                drops.push({
+                    el: drop,
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    speed: 2 + Math.random() * 3
+                });
             }
 
-            d.el.style.left = d.x + "px";
-            d.el.style.top = d.y + "px";
-        }
-
-        requestAnimationFrame(animateRain);
-    }
-
-    // Lightning effect
-    function lightning() {
-        var flash = document.createElement("div");
-        flash.style.position = "absolute";
-        flash.style.left = "0";
-        flash.style.top = "0";
-        flash.style.width = "100%";
-        flash.style.height = "100%";
-        flash.style.background = "white";
-        flash.style.opacity = "0.8";
-
-        box.appendChild(flash);
-
-        setTimeout(function () {
-            flash.style.opacity = "0";
-        }, 50);
-
-        setTimeout(function () {
-            if (flash.parentNode) {
-                flash.parentNode.removeChild(flash);
+            function animateRain() {
+                drops.forEach(d => {
+                    d.y += d.speed;
+                    if (d.y > height) {
+                        d.y = -10;
+                        d.x = Math.random() * width;
+                    }
+                    d.el.style.left = d.x + "px";
+                    d.el.style.top = d.y + "px";
+                });
+                requestAnimationFrame(animateRain);
             }
-        }, 200);
 
-        setTimeout(lightning, 2000 + Math.random() * 5000);
-    }
+            // Lightning flash
+            function lightning() {
+                var flash = document.createElement("div");
+                flash.style.position = "absolute";
+                flash.style.left = "0";
+                flash.style.top = "0";
+                flash.style.width = "100%";
+                flash.style.height = "100%";
+                flash.style.background = "white";
+                flash.style.opacity = "0.8";
 
-    animateRain();
-    lightning();
-})();
-</script>
-    
+                rainBox.appendChild(flash);
+
+                setTimeout(() => { flash.style.opacity = "0"; }, 50);
+                setTimeout(() => { if(flash.parentNode) flash.parentNode.removeChild(flash); }, 200);
+
+                setTimeout(lightning, 2000 + Math.random() * 5000);
+            }
+
+            animateRain();
+            lightning();
+        })();
+    </script>
+
 </body>
 </html>
