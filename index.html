@@ -22,20 +22,45 @@
 
 <script>
 // Setup canvas
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jumping Ball Animation</title>
+  <style>
+    body {
+      margin: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    canvas {
+      background: #111;
+      width: 300em;   /* visual size */
+      height: 300em;
+      max-width: 100%; /* prevents overflow */
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas" width="500" height="300"></canvas>
+
+<script>
+// Setup canvas
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 // Ball properties
 var ball = {
   x: canvas.width / 2,
-  y: 100,
+  y: 50,
   radius: 20,
-  dy: 0,          // velocity Y
-  gravity: 0.6,
-  bounce: 0.7
+  dy: 5,        // initial upward motion
+  gravity: 0.5,
+  bounce: 1     // perfect bounce (no energy loss)
 };
 
 // Animation loop
@@ -46,10 +71,16 @@ function animate() {
   ball.dy += ball.gravity;
   ball.y += ball.dy;
 
-  // Ground collision
+  // Bounce on ground
   if (ball.y + ball.radius > canvas.height) {
     ball.y = canvas.height - ball.radius;
-    ball.dy *= -ball.bounce;
+    ball.dy = -Math.abs(ball.dy); // always bounce upward
+  }
+
+  // Bounce on ceiling (optional for continuous motion)
+  if (ball.y - ball.radius < 0) {
+    ball.y = ball.radius;
+    ball.dy = Math.abs(ball.dy);
   }
 
   // Draw ball
@@ -64,6 +95,10 @@ function animate() {
 
 // Start animation
 animate();
+</script>
+
+</body>
+</html>
 </script>
 
 </body>
