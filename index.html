@@ -1,105 +1,72 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Web Page</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Spin-off of "Project: Blog"</title>
-    </head>
-    <style>
-        body {
-            background-color: rgb(97, 112, 9);
-            border: 5px solid ;
-            border-radius: 20px;
-	    margin: auto;
-	    z-index: 3;
-        }
-	#xmastree {
-	float: left;
-	
-	border: solid 5px;
-	border-radius: 30px;
-	z-index: 2;
-	}
-        #blog-name {
-	    margin: auto;
-            font-size: 5em;
-            text-align: center;
-            font-family: monospace;
-            background-color: white;
-            text-shadow: 2px 2px rgb(100, 190, 60);
-            border: 10px solid #73AD21;
-	    border-radius: 15px;
-	    z-index: 1;
-        }
-        #content-head {
-            text-align: center;
-            
-        }
-        #content-content {
-            text-align: left;
-        }
-        #first-post {
-            content: "day1";
-        }
+<head>
+  <title>Jumping Ball Animation</title>
+  <style>
+    body { margin: 0; }
+    canvas { background: #111; display: block; }
+  </style>
+</head>
+<body>
 
+<canvas id="canvas"></canvas>
 
+<script>
+// Setup canvas
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
 
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-        .contents{
-	    margin: auto;
-            background-color: white;
-            border: 3px solid rgb(100, 190, 160);
-	    border-radius: 20px;
-	    width: 50%;
-        }
-        .post-head{
-	    margin: auto;
-            text-align: center;
-            background-color: white;
-            border: 5px solid rgb(196, 188, 43);
-	    border-radius: 20px;
-	    width: 30%;
-        }
-        .date{
-            text-align: right;
-            font-style: italic;
-        }
-        .post-body{
-            color: white;
-            background-color: rgb(18, 18, 18);
-        }
-        
-    </style>
-    <body>
-        <img id="xmastree" alt="xmastree" width="50" src="https://github.com/Dhrubajyoti930/myweb2/blob/main/xmastree.jpg?raw=true">
-        <h1 id="blog-name">__DC's blog__</h1>
+// Ball properties
+var ball = {
+  x: canvas.width / 2,
+  y: 100,
+  radius: 20,
+  dy: 0,          // velocity Y
+  gravity: 0.6,
+  bounce: 0.7
+};
 
-        <h3 id="content-head" class="contents">Contents</h3>
-        <table class="contents">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><li><a href="#first-post">First post!</a></li></td>
-                    <td>9 May 2025</td>
-                </tr>
-                <tr>
-                    <td><li><a href="#second-post">Second post!</a></li></td>
-                    <td>9 May 2025</td>
-                </tr>
-            </tbody>
-        </table>
+// Animation loop
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        
-        <h2 class="post-head" id="first-post">First post</h2>
-        <h6 class="date">Posted on 9 May in 2025</h6>
-        <p class="post-body">I'm making my own blog.</p>
-        
-        <h2 class="post-head" id="second-post">Second post</h2>
-        <h6 class="date">Posted on 9 May in 2025</h6>
-        <p class="post-body">I did alot of progress today.</p>
-    </body>
+  // Apply gravity
+  ball.dy += ball.gravity;
+  ball.y += ball.dy;
+
+  // Ground collision
+  if (ball.y + ball.radius > canvas.height) {
+    ball.y = canvas.height - ball.radius;
+    ball.dy *= -ball.bounce;
+  }
+
+  // Draw ball
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ctx.fillStyle = "orange";
+  ctx.fill();
+  ctx.closePath();
+
+  requestAnimationFrame(animate);
+}
+
+// Start animation
+animate();
+</script>
+
+</body>
+</html>
+</body>
 </html>
