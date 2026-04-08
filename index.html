@@ -3,104 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Chem Engine | Pro Edition</title>
+    <title>Quantum Chem Engine | Ultra Fast</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --accent: #00ff88; 
-            --accent-glow: rgba(0, 255, 136, 0.4);
-            --bg: #090a0f; 
-            --panel: rgba(20, 22, 30, 0.6); 
-            --text: #e2e8f0; 
-        }
+        :root { --accent: #00ff88; --bg: #050505; --panel: rgba(15,15,15,0.9); --text: #eee; }
+        body, html { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; overflow: hidden; }
         
-        body, html { 
-            margin: 0; padding: 0; 
-            background: radial-gradient(circle at center, #1a1c29 0%, var(--bg) 100%); 
-            color: var(--text); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            overflow: hidden; 
-        }
-        
-        #ui { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; padding: 25px; box-sizing: border-box; 
-            display: flex; flex-direction: column; justify-content: space-between; 
-        }
-        
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
         #ui * { pointer-events: auto; }
         
-        .panel { 
-            background: var(--panel); 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.08); 
-            border-radius: 12px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
+        .panel { background: var(--panel); border: 1px solid #333; border-radius: 8px; }
         
-        .header-container { display: flex; justify-content: space-between; align-items: flex-start; }
+        .search-container { position: relative; width: 300px; }
+        input { width: 100%; background: #111; border: 1px solid #333; padding: 12px; border-radius: 6px; color: #fff; outline: none; box-sizing: border-box; font-size: 14px; }
+        input:focus { border-color: var(--accent); }
+        .suggestions { position: absolute; top: 100%; left: 0; width: 100%; max-height: 200px; overflow-y: auto; background: #111; border: 1px solid #333; border-top: none; z-index: 10; display: none; }
+        .suggestions div { padding: 10px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #222; }
+        .suggestions div:hover { background: var(--accent); color: #000; }
 
-        .search-container { position: relative; width: 320px; }
-        .search-icon { position: absolute; left: 15px; top: 15px; color: #666; pointer-events: none; }
-        input { 
-            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); 
-            padding: 14px 14px 14px 40px; border-radius: 10px; color: #fff; 
-            outline: none; box-sizing: border-box; font-size: 15px; transition: all 0.3s ease;
-        }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+        .controls { position: absolute; top: 15px; right: 15px; display: flex; gap: 5px; }
+        button { background: #111; border: 1px solid #333; color: #aaa; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        #data-box { width: 300px; padding: 15px; box-sizing: border-box; }
+        .title { font-size: 20px; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+        .label { font-size: 10px; color: #666; text-transform: uppercase; margin-top: 10px; }
+        .val { font-size: 13px; font-family: monospace; word-wrap: break-word; }
         
-        .suggestions { 
-            position: absolute; top: calc(100% + 5px); left: 0; width: 100%; 
-            max-height: 250px; overflow-y: auto; background: var(--panel); 
-            backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); 
-            border-radius: 10px; z-index: 10; display: none; 
-        }
-        .suggestions div { padding: 12px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
-        .suggestions div:last-child { border-bottom: none; }
-        .suggestions div:hover { background: rgba(0, 255, 136, 0.15); color: var(--accent); padding-left: 20px;}
-
-        .controls { display: flex; background: rgba(0,0,0,0.4); padding: 5px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); gap: 5px; }
-        button { 
-            background: transparent; border: none; color: #888; padding: 10px 16px; 
-            border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; 
-            transition: all 0.3s ease; 
-        }
-        button:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        button.active { background: var(--accent); color: #000; box-shadow: 0 0 10px var(--accent-glow); }
-
-        .sidebar { display: flex; flex-direction: column; gap: 15px; width: 320px; }
-
-        #data-box { padding: 25px; }
-        .title { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .subtitle { font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; font-weight: 700; }
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .data-item { display: flex; flex-direction: column; gap: 4px; }
-        .data-item.full { grid-column: span 2; }
-        .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-        .val { font-size: 14px; font-family: 'Courier New', monospace; color: #ddd; word-wrap: break-word; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; }
-        
-        #tooltip { 
-            position: absolute; background: rgba(0,0,0,0.8); color: #fff; padding: 8px 12px; 
-            border-radius: 6px; font-size: 13px; font-weight: 600; pointer-events: none; 
-            display: none; z-index: 100; transform: translate(-50%, -150%); 
-            border: 1px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-        }
-        
-        #loader { 
-            display: none; position: absolute; right: 15px; top: 15px; width: 16px; height: 16px; 
-            border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent); 
-            border-radius: 50%; animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
-        }
+        #tooltip { position: absolute; background: #000; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; pointer-events: none; display: none; z-index: 100; transform: translate(-50%, -150%); border: 1px solid var(--accent); }
+        #loader { display: none; position: absolute; right: 12px; top: 12px; width: 14px; height: 14px; border: 2px solid #333; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .toolbar { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; padding: 8px; border-radius: 30px; }
-        .tool-btn { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; padding: 0; font-size: 16px; background: rgba(255,255,255,0.05); color: #fff;}
-        .tool-btn:hover { background: var(--accent); color: #000; transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow);}
         
-        #perf { position: absolute; bottom: 25px; right: 25px; font-size: 12px; color: #555; font-family: monospace; text-align: right; pointer-events: none;}
+        /* Stats */
+        #perf { position: absolute; bottom: 15px; right: 15px; font-size: 10px; color: #666; font-family: monospace; text-align: right; pointer-events: none;}
     </style>
 </head>
 <body>
@@ -108,126 +44,77 @@
 <div id="tooltip"></div>
 
 <div id="ui">
-    <div class="header-container">
-        <div class="search-container">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" id="search" placeholder="Search molecule (e.g. Caffeine)..." autocomplete="off">
-            <div id="loader"></div>
-            <div id="suggestions" class="suggestions"></div>
-        </div>
-
-        <div class="controls">
-            <button class="mode-btn active" data-mode="ball">Ball & Stick</button>
-            <button class="mode-btn" data-mode="stick">Sticks</button>
-            <button class="mode-btn" data-mode="space">Spacefill</button>
-            <button class="mode-btn" data-mode="wire">Wireframe</button>
-        </div>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search (e.g. Titanium Dioxide)..." autocomplete="off">
+        <div id="loader"></div>
+        <div id="suggestions" class="suggestions"></div>
     </div>
 
-    <div class="sidebar">
-        <div id="data-box" class="panel">
-            <div id="m-name" class="title">Loading...</div>
-            <div class="subtitle">Quantum Properties</div>
-            <div class="data-grid">
-                <div class="data-item">
-                    <span class="label">Formula</span>
-                    <span id="m-form" class="val">-</span>
-                </div>
-                <div class="data-item">
-                    <span class="label">Mass (g/mol)</span>
-                    <span id="m-mass" class="val">-</span>
-                </div>
-                <div class="data-item full">
-                    <span class="label">Canonical SMILES</span>
-                    <span id="m-smiles" class="val" style="color: #888; font-size: 12px;">-</span>
-                </div>
-            </div>
-        </div>
+    <div class="controls">
+        <button class="mode-btn active" data-mode="ball">Ball & Stick</button>
+        <button class="mode-btn" data-mode="space">Spacefill</button>
     </div>
 
-    <div class="toolbar panel">
-        <button class="tool-btn" id="btn-rotate" title="Toggle Auto-Rotate"><i class="fas fa-sync-alt"></i></button>
-        <button class="tool-btn" id="btn-reset" title="Reset Camera"><i class="fas fa-video"></i></button>
-        <button class="tool-btn" id="btn-photo" title="Take Snapshot"><i class="fas fa-camera"></i></button>
+    <div id="data-box" class="panel">
+        <div id="m-name" class="title">Loading...</div>
+        <div class="label">Formula</div><div id="m-form" class="val">-</div>
+        <div class="label">Mass (g/mol)</div><div id="m-mass" class="val">-</div>
+        <div class="label">SMILES</div><div id="m-smiles" class="val" style="color: #888;">-</div>
     </div>
     
-    <div id="perf">Vertices: 0 | Draw Calls: 0</div>
+    <div id="perf">Atoms: 0 | Bonds: 0</div>
 </div>
 
 <script>
-    // Expanded CPK Color Dictionary
+    // Minimal atomic dictionary mapped to RGB colors
     const ATOMS = {
-        'H': { c: 0xFFFFFF, r: 0.32, n: 'Hydrogen' },   'C': { c: 0x909090, r: 0.55, n: 'Carbon' },
-        'N': { c: 0x3050F8, r: 0.50, n: 'Nitrogen' },   'O': { c: 0xFF0D0D, r: 0.50, n: 'Oxygen' },
-        'F': { c: 0x90E050, r: 0.45, n: 'Fluorine' },   'P': { c: 0xFF8000, r: 0.65, n: 'Phosphorus' },
-        'S': { c: 0xFFFF30, r: 0.65, n: 'Sulfur' },     'Cl':{ c: 0x1FF01F, r: 0.60, n: 'Chlorine' },
-        'Br':{ c: 0xA62929, r: 0.70, n: 'Bromine' },    'I': { c: 0x940094, r: 0.80, n: 'Iodine' },
-        'Fe':{ c: 0xE06633, r: 0.75, n: 'Iron' },       'Cu':{ c: 0xC88033, r: 0.75, n: 'Copper' },
-        'Ag':{ c: 0xC0C0C0, r: 0.85, n: 'Silver' },     'Au':{ c: 0xFFD123, r: 0.85, n: 'Gold' },
-        'Na':{ c: 0xAB5CF2, r: 0.80, n: 'Sodium' },     'K': { c: 0x8F40D4, r: 1.00, n: 'Potassium' },
-        'Ca':{ c: 0x3DFF00, r: 0.85, n: 'Calcium' },    'Mg':{ c: 0x8AFF00, r: 0.75, n: 'Magnesium' }
+        'H': { c: new THREE.Color(0xffffff), r: 0.32, n: 'Hydrogen' }, 'C': { c: new THREE.Color(0x555555), r: 0.55, n: 'Carbon' },
+        'N': { c: new THREE.Color(0x3366ff), r: 0.50, n: 'Nitrogen' }, 'O': { c: new THREE.Color(0xff2222), r: 0.50, n: 'Oxygen' },
+        'S': { c: new THREE.Color(0xddcc00), r: 0.65, n: 'Sulfur' },   'P': { c: new THREE.Color(0xff8800), r: 0.65, n: 'Phosphorus' },
+        'Cl':{ c: new THREE.Color(0x00ff00), r: 0.60, n: 'Chlorine' }, 'F': { c: new THREE.Color(0x00ffff), r: 0.45, n: 'Fluorine' }
     };
-    const defaultAtom = { c: 0xFF1493, r: 0.6, n: 'Unknown Element' }; // Hot pink for missing elements
+    const defaultAtom = { c: new THREE.Color(0xaaaaaa), r: 0.5, n: 'Unknown' };
 
     let scene, camera, renderer, controls;
-    let atomMesh, bondMesh; 
-    let atomDataMap = []; 
+    let atomMesh, bondMesh; // The only two meshes we need!
+    let atomDataMap = []; // For raycaster tooltips
     let raycaster, mouse;
-    
     let currentMode = 'ball';
-    let currentSDF = null; 
-    let autoRotate = true;
 
-    // High Quality Geometries & Materials
-    const sphereGeo = new THREE.SphereGeometry(1, 32, 32); 
-    const bondRadius = 0.15;
-    const bondGeo = new THREE.CylinderGeometry(bondRadius, bondRadius, 1, 12);
-    bondGeo.rotateX(Math.PI / 2); 
-    bondGeo.translate(0, 0, 0.5); 
+    // Shared Geometries & Materials
+    const sphereGeo = new THREE.SphereGeometry(1, 16, 16); // Low poly, smooth shading makes it look round
+    const bondGeo = new THREE.CylinderGeometry(0.12, 0.12, 1, 6);
+    bondGeo.rotateX(Math.PI / 2); // Point along Z axis
+    bondGeo.translate(0, 0, 0.5); // Pivot at the base
     
-    const atomMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 });
-    const bondMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2 });
-    const wireMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.3 });
+    const atomMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const bondMat = new THREE.MeshPhongMaterial({ color: 0xffffff });
 
-    // Pre-allocated math objects for hyper-fast iteration
+    // Reusable math objects (prevents garbage collection stutter)
     const _matrix = new THREE.Matrix4();
     const _position = new THREE.Vector3();
     const _scale = new THREE.Vector3();
     const _quaternion = new THREE.Quaternion();
-    const _dir = new THREE.Vector3();
-    const _zAxis = new THREE.Vector3(0, 0, 1);
-    const _color = new THREE.Color();
+    const _up = new THREE.Vector3(0, 1, 0);
 
     function init() {
         scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x090a0f, 0.015);
-
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         document.body.appendChild(renderer.domElement);
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.autoRotate = autoRotate;
-        controls.autoRotateSpeed = 1.5;
+        controls.dampingFactor = 0.1;
+        controls.autoRotate = true;
 
-        // Lighting
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-        hemiLight.position.set(0, 20, 0);
-        scene.add(hemiLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(10, 20, 15);
-        scene.add(dirLight);
-        const backLight = new THREE.DirectionalLight(0x00ff88, 0.3);
-        backLight.position.set(-10, -10, -15);
-        scene.add(backLight);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(10, 20, 10);
+        scene.add(light);
 
         raycaster = new THREE.Raycaster();
         mouse = new THREE.Vector2();
@@ -244,62 +131,45 @@
         document.getElementById('loader').style.display = 'block';
         try {
             const metaRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(query)}/property/MolecularFormula,MolecularWeight,CanonicalSMILES/JSON`);
-            if(!metaRes.ok) throw new Error("Not found");
             const meta = await metaRes.json();
             const p = meta.PropertyTable.Properties[0];
 
-            document.getElementById('m-name').innerText = query.charAt(0).toUpperCase() + query.slice(1);
-            document.getElementById('m-form').innerHTML = formatFormula(p.MolecularFormula);
+            document.getElementById('m-name').innerText = query;
+            document.getElementById('m-form').innerText = p.MolecularFormula;
             document.getElementById('m-mass').innerText = p.MolecularWeight;
             document.getElementById('m-smiles').innerText = p.CanonicalSMILES;
 
             let sdfRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${p.CID}/record/SDF/?record_type=3d`);
             if (!sdfRes.ok) sdfRes = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${p.CID}/record/SDF/`);
             
-            currentSDF = await sdfRes.text();
-            buildMolecule(currentSDF);
+            buildMolecule(await sdfRes.text());
         } catch (e) {
-            document.getElementById('m-name').innerText = "Molecule Not Found";
-            document.getElementById('m-form').innerText = "-";
-            document.getElementById('m-mass').innerText = "-";
-            document.getElementById('m-smiles').innerText = "Try checking your spelling.";
-            currentSDF = null;
+            document.getElementById('m-name').innerText = "Not Found";
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     }
 
-    function formatFormula(formula) {
-        return formula.replace(/(\d+)/g, '<sub>$1</sub>');
-    }
-
     function buildMolecule(sdf) {
-        if (!sdf) return;
-        
+        // Cleanup old meshes
         if (atomMesh) { scene.remove(atomMesh); atomMesh.dispose(); }
         if (bondMesh) { scene.remove(bondMesh); bondMesh.dispose(); }
         atomDataMap = [];
 
         const lines = sdf.split('\n');
-        const countsLine = lines[3].trim().split(/\s+/);
-        const atomCount = parseInt(countsLine[0]);
-        const bondCount = parseInt(countsLine[1]);
+        const counts = lines[3].trim().split(/\s+/);
+        const atomCount = parseInt(counts[0]);
+        const bondCount = parseInt(counts[1]);
 
-        const activeAtomMat = currentMode === 'wire' ? wireMat : atomMat;
-        const activeBondMat = currentMode === 'wire' ? wireMat : bondMat;
-
-        atomMesh = new THREE.InstancedMesh(sphereGeo, activeAtomMat, atomCount);
-        
-        // Setup Bonds Instanced Mesh
-        const totalBondInstances = currentMode === 'space' ? 0 : bondCount * 2;
-        bondMesh = new THREE.InstancedMesh(bondGeo, activeBondMat, Math.max(1, totalBondInstances));
-        bondMesh.count = totalBondInstances; // Safely hide if 0
+        // Setup Instanced Meshes
+        atomMesh = new THREE.InstancedMesh(sphereGeo, atomMat, atomCount);
+        bondMesh = new THREE.InstancedMesh(bondGeo, bondMat, currentMode === 'space' ? 0 : bondCount * 2);
         
         const rawAtoms = [];
         let min = new THREE.Vector3(Infinity, Infinity, Infinity);
         let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 
-        // 1. Process Atoms
+        // 1. Parse & Set Atoms (O(N))
         for (let i = 0; i < atomCount; i++) {
             const parts = lines[4 + i].trim().split(/\s+/);
             const x = parseFloat(parts[0]), y = parseFloat(parts[1]), z = parseFloat(parts[2]);
@@ -307,54 +177,44 @@
             const data = ATOMS[el] || defaultAtom;
 
             _position.set(x, y, z);
-            min.min(_position); max.max(_position); 
+            min.min(_position); max.max(_position); // Calculate bounding box fast
             
-            let r = data.r;
-            if (currentMode === 'space') r *= 2.5;
-            if (currentMode === 'wire') r *= 1.2;
-            if (currentMode === 'stick') r = bondRadius; // Make atoms exactly as thick as bonds
-
+            const r = currentMode === 'space' ? data.r * 2.5 : data.r;
             _scale.set(r, r, r);
             _matrix.compose(_position, _quaternion.identity(), _scale);
             
             atomMesh.setMatrixAt(i, _matrix);
-            _color.setHex(data.c);
-            atomMesh.setColorAt(i, _color);
+            atomMesh.setColorAt(i, data.c);
 
-            rawAtoms.push({ pos: _position.clone(), c: _color.clone() });
-            atomDataMap.push({ name: data.n, symbol: el }); 
+            rawAtoms.push({ pos: _position.clone(), c: data.c });
+            atomDataMap.push({ name: data.n, symbol: el }); // Save for raycaster
         }
 
-        // 2. Process Bonds (Now Gimbal-Lock Proof)
+        // 2. Parse & Set Bonds (O(N) - exact SDF data instead of math distance loops)
         if (currentMode !== 'space' && bondCount > 0) {
             let bondIndex = 0;
             for (let i = 0; i < bondCount; i++) {
                 const parts = lines[4 + atomCount + i].trim().split(/\s+/);
-                const a1 = parseInt(parts[0]) - 1; 
+                const a1 = parseInt(parts[0]) - 1; // SDF is 1-indexed
                 const a2 = parseInt(parts[1]) - 1;
-
-                if(!rawAtoms[a1] || !rawAtoms[a2]) continue;
 
                 const p1 = rawAtoms[a1].pos;
                 const p2 = rawAtoms[a2].pos;
                 const mid = p1.clone().lerp(p2, 0.5);
                 const dist = p1.distanceTo(mid);
 
-                // Safer quaternion math for orienting cylinders
-                _dir.subVectors(mid, p1).normalize();
-                _quaternion.setFromUnitVectors(_zAxis, _dir);
-                _scale.set(1, 1, dist);
-
-                // Half Bond 1
-                _matrix.compose(p1, _quaternion, _scale);
+                // Half Bond 1 (From Atom 1 to Midpoint)
+                _matrix.lookAt(p1, mid, _up);
+                _matrix.multiply(new THREE.Matrix4().makeScale(1, 1, dist));
+                _matrix.setPosition(p1);
                 bondMesh.setMatrixAt(bondIndex, _matrix);
                 bondMesh.setColorAt(bondIndex, rawAtoms[a1].c);
                 bondIndex++;
 
-                // Half Bond 2 (Invert direction for second half)
-                _dir.subVectors(mid, p2).normalize();
-                _quaternion.setFromUnitVectors(_zAxis, _dir);
-                _matrix.compose(p2, _quaternion, _scale);
+                // Half Bond 2 (From Atom 2 to Midpoint)
+                _matrix.lookAt(p2, mid, _up);
+                _matrix.multiply(new THREE.Matrix4().makeScale(1, 1, dist));
+                _matrix.setPosition(p2);
                 bondMesh.setMatrixAt(bondIndex, _matrix);
                 bondMesh.setColorAt(bondIndex, rawAtoms[a2].c);
                 bondIndex++;
@@ -368,19 +228,14 @@
         atomMesh.instanceColor.needsUpdate = true;
         scene.add(atomMesh);
 
-        // UI Metrics
-        const polyCount = (atomCount * 1024) + (totalBondInstances * 48);
-        document.getElementById('perf').innerText = `Atoms: ${atomCount} | Bonds: ${bondCount} | Vertices: ~${polyCount.toLocaleString()}`;
+        document.getElementById('perf').innerText = `Atoms: ${atomCount} | Bonds: ${bondCount}`;
 
         // Auto Frame Camera
         const center = min.clone().lerp(max, 0.5);
         const size = max.distanceTo(min);
-        scene.position.copy(center).multiplyScalar(-1); 
-        
-        if(document.activeElement.id === 'search' || camera.position.length() < 1) {
-            camera.position.set(0, 0, Math.max(size * 1.5, 12));
-            controls.target.set(0,0,0);
-        }
+        scene.position.sub(center); // Center the world
+        camera.position.set(0, 0, Math.max(size * 1.2, 10));
+        controls.target.set(0,0,0);
     }
 
     // --- INTERACTION & UI ---
@@ -392,6 +247,7 @@
         if (!atomMesh) return;
 
         raycaster.setFromCamera(mouse, camera);
+        // Only intersect atoms, ignore bonds
         const hit = raycaster.intersectObject(atomMesh)[0]; 
 
         if (hit && hit.instanceId !== undefined) {
@@ -400,7 +256,7 @@
             tt.style.left = e.clientX + 'px';
             tt.style.top = e.clientY + 'px';
             const data = atomDataMap[hit.instanceId];
-            tt.innerHTML = `<span style="color:var(--accent)">${data.symbol}</span> - ${data.name}`;
+            tt.innerText = `${data.name} (${data.symbol})`;
         } else {
             document.body.style.cursor = 'default';
             tt.style.display = 'none';
@@ -416,59 +272,35 @@
             clearTimeout(timer);
             if(input.value.length < 2) { sugg.style.display = "none"; return; }
             timer = setTimeout(async () => {
-                try {
-                    const r = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/autocomplete/compound/${input.value}/json?limit=6`);
-                    const data = await r.json();
-                    sugg.innerHTML = "";
-                    if(data.dictionary_terms) {
-                        sugg.style.display = "block";
-                        data.dictionary_terms.compound.forEach(term => {
-                            const div = document.createElement('div');
-                            div.innerHTML = `<i class="fas fa-flask" style="margin-right:8px; color:#555;"></i> ${term}`;
-                            div.onclick = () => { 
-                                input.value = term; 
-                                sugg.style.display = "none"; 
-                                fetchMolecule(term); 
-                            };
-                            sugg.appendChild(div);
-                        });
-                    }
-                } catch(e) { }
-            }, 300);
+                const r = await fetch(`https://pubchem.ncbi.nlm.nih.gov/rest/autocomplete/compound/${input.value}/json?limit=5`);
+                const data = await r.json();
+                sugg.innerHTML = "";
+                if(data.dictionary_terms) {
+                    sugg.style.display = "block";
+                    data.dictionary_terms.compound.forEach(term => {
+                        const div = document.createElement('div');
+                        div.innerText = term;
+                        div.onclick = () => { 
+                            input.value = term; 
+                            sugg.style.display = "none"; 
+                            fetchMolecule(term); 
+                        };
+                        sugg.appendChild(div);
+                    });
+                }
+            }, 250);
         });
 
-        document.addEventListener('click', e => { 
-            if(!e.target.closest('.search-container')) sugg.style.display = 'none'; 
-        });
+        document.addEventListener('click', e => { if(!e.target.closest('.search-container')) sugg.style.display = 'none'; });
 
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.onclick = (e) => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentMode = e.target.dataset.mode;
-                buildMolecule(currentSDF); 
+                fetchMolecule(document.getElementById('m-name').innerText);
             };
         });
-
-        document.getElementById('btn-rotate').onclick = function() {
-            autoRotate = !autoRotate;
-            controls.autoRotate = autoRotate;
-            this.style.color = autoRotate ? '#fff' : '#555';
-        };
-
-        document.getElementById('btn-reset').onclick = function() {
-            camera.position.set(0, 0, 15);
-            controls.target.set(0,0,0);
-        };
-
-        document.getElementById('btn-photo').onclick = function() {
-            renderer.render(scene, camera);
-            const dataURL = renderer.domElement.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = dataURL;
-            a.download = `${document.getElementById('m-name').innerText}_render.png`;
-            a.click();
-        };
     }
 
     function onResize() {
